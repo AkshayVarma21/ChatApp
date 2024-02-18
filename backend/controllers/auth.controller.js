@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs"
 import User from "../models/user.model.js";
+import generateTokenAndSetCookie from "../utils/generateToken.js";
 
 export const signup = async (req, res) => {
     try {
@@ -10,6 +11,7 @@ export const signup = async (req, res) => {
         }
         const user = await User.findOne({userName})
         if (user) {
+
             return res.status(400).json({ error: "User already exist" })
         }
 
@@ -29,6 +31,8 @@ export const signup = async (req, res) => {
         });
 
         if(newUser){
+            generateTokenAndSetCookie(newUser._id,res)
+
             await newUser.save();
 
             res.status(201).json({
