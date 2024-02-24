@@ -5,7 +5,6 @@ export const sendMessage = async (req, res) => {
     try {
         const { message } = req.body;
         const { id: receiverId } = req.params;
-        console.log("user id", req.user)
         const senderId = req.user?._id;
 
         let conversation = await Conversation.findOne({
@@ -43,24 +42,27 @@ export const sendMessage = async (req, res) => {
 
 
 export const getMessage = async (req, res) => {
-try {
+    try {
+        const { id: receiverId } = req.params;
+        const senderId = req.user._id;
+        const conversation = await Conversation.findOne({
+            participants: { $all: [senderId, receiverId] }
+        }).populate("messages");
 
-    const {id:receiverId} = req.params;
-    const senderId = req.user._id;
+        if (!conversation) {
+            return res.status(200).json([]);
+        }
 
-    const conversation = await Conversation.findOne({
-        participants:{$all:[senderId, receiverId]}
-    }).populate("messages")
+        if (conversation.messages) {
+            res.status(200).json(conversation.messages);
+        } else {
+            res.status(200).json([]);
+        }
+    } catch (error) {
+        console.log("Error in get message controller:", error.message);
+        res.status(500).json({
+            error: "Internal server error"
+        });
+    }
 
-    if(!conversation) res.status(200).json([])
-
-    const messages = conversation.messages;
-    res.status(200).json(messages)
-    
-} catch (error) {
-    console.log("Error in get message controller:", error.message)
-    res.status(500).json({
-        error: "Internal server error"
-    })
-}
 }
