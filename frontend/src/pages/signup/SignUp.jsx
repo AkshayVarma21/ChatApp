@@ -1,23 +1,26 @@
 import { Link } from "react-router-dom";
 import GenderCheckbox from "./GenderCheckbox";
 import { useState } from "react";
+import useSignup from "../../hooks/useSignup";
 
 const SignUp = () => {
     const [inputs, setInputs] = useState({
         fullName: '',
         userName: '',
         password: '',
-        confirmPassowrd: '',
+        confirmPassword: '',
         gender: ''
     })
 
-    const handleCheckbox=(gender)=>{
-        setInputs({...inputs,gender})
+    const { loading, signup } = useSignup();
+
+    const handleCheckbox = (gender) => {
+        setInputs({ ...inputs, gender })
     }
 
-    const handleSubmit =(e)=>{
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        console.log(inputs);
+        await signup(inputs);
     }
     return (
         <div className='flex flex-col items-center justify-center min-w-96 mx-auto'>
@@ -65,18 +68,20 @@ const SignUp = () => {
                             type='password'
                             placeholder='Confirm Password'
                             className='w-full input input-bordered h-10'
-                            value={inputs.confirmPassowrd} onChange={(e) => setInputs({ ...inputs, confirmPassowrd : e.target.value })}
+                            value={inputs.confirmPassword} onChange={(e) => setInputs({ ...inputs, confirmPassword: e.target.value })}
                         />
                     </div>
 
-                    <GenderCheckbox onChangeCheckbox={handleCheckbox} selectedGender={inputs.gender}/>
+                    <GenderCheckbox onChangeCheckbox={handleCheckbox} selectedGender={inputs.gender} />
 
                     <Link to="/login" className='text-sm hover:underline hover:text-blue-600 mt-2 inline-block' href='#'>
                         Already have an account?
                     </Link>
 
                     <div>
-                        <button className='btn btn-block btn-sm mt-2 border border-slate-700'>Sign Up</button>
+                        <button className='btn btn-block btn-sm mt-2 border border-slate-700' disabled={loading}>
+                            {loading ? <span className="loading loading-spinner"></span> : "Sign Up"}
+                        </button>
                     </div>
                 </form>
             </div>
